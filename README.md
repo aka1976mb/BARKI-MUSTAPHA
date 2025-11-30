@@ -33,4 +33,4 @@ I believe that a frictionless development environment is not a luxury—it's ess
 
 *Feel free to reach out to me for collaborations or discussions on improving developer productivity.*
 
-**(Links to your LinkedIn, Blog, etc. can be added here)**
+[LinkedIn Profile](https://www.linkedin.com/in/start-export/en/)
