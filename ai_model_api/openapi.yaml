@@ -1,0 +1,272 @@
+openapi: 3.0.3
+info:
+  title: Barki Mustapha Engineering API
+  version: 1.0.0
+  description: Public API exposing profile, competencies, projects, and AI-backed DevEx utilities.
+servers:
+  - url: https://api.barki.dev/v1
+    description: Production
+  - url: https://staging.api.barki.dev/v1
+    description: Staging
+tags:
+  - name: profile
+  - name: competencies
+  - name: projects
+  - name: automations
+  - name: ai
+paths:
+  /health:
+    get:
+      summary: Health check
+      tags: [profile]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "ok" }
+                  uptimeSeconds: { type: number, example: 12345 }
+  /profile:
+    get:
+      summary: Public profile
+      tags: [profile]
+      responses:
+        '200':
+          description: Profile data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+  /links:
+    get:
+      summary: Social and contact links
+      tags: [profile]
+      responses:
+        '200':
+          description: Links
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  linkedin: { type: string, example: "https://www.linkedin.com/in/barki-mustapha" }
+                  tiktok: { type: string, example: "https://www.tiktok.com/@barki.mustapha" }
+                  github: { type: string, example: "https://github.com/barkimustapha" }
+                  website: { type: string, example: "https://barki.dev" }
+  /competencies:
+    get:
+      summary: Core competencies and skills
+      tags: [competencies]
+      responses:
+        '200':
+          description: Competencies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Competencies'
+  /projects:
+    get:
+      summary: Featured projects
+      tags: [projects]
+      parameters:
+        - in: query
+          name: tag
+          schema: { type: string }
+          description: Filter by tag (e.g., "vscode", "lsp", "ci-cd")
+      responses:
+        '200':
+          description: Project list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+  /automations:
+    get:
+      summary: Available DevEx automations
+      tags: [automations]
+      responses:
+        '200':
+          description: Automation catalog
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Automation'
+    post:
+      summary: Execute an automation
+      tags: [automations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutomationRunRequest'
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRunResponse'
+  /ai/recommend-tools:
+    post:
+      summary: AI-backed tool recommendations for a given stack or workflow
+      tags: [ai]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stack:
+                  type: array
+                  items: { type: string }
+                  example: ["typescript", "node", "docker", "aws"]
+                goals:
+                  type: array
+                  items: { type: string }
+                  example: ["fast onboarding", "quality gates", "editor automation"]
+      responses:
+        '200':
+          description: Ranked tools with rationale
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recommendations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name: { type: string }
+                        category: { type: string }
+                        rank: { type: integer }
+                        rationale: { type: string }
+  /ai/generate-vscode-setup:
+    post:
+      summary: Generate a VS Code devcontainer + extensions + settings for a project
+      tags: [ai]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VSCodeSetupRequest'
+      responses:
+        '200':
+          description: VS Code configuration bundle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VSCodeSetupResponse'
+components:
+  schemas:
+    Profile:
+      type: object
+      properties:
+        name: { type: string, example: "Barki Mustapha" }
+        title: { type: string, example: "Visual Studio Code Engineer & Developer Experience Specialist" }
+        summary: { type: string }
+        philosophy: { type: string }
+        location: { type: string, example: "Casablanca, Morocco" }
+    Competencies:
+      type: object
+      properties:
+        vsCodeEcosystem:
+          type: array
+          items: { type: string }
+          example:
+            - "Custom VS Code Extension Development"
+            - "Workspace & Dev Container Configuration"
+            - "Language Server Protocol (LSP) Integration"
+            - "Editor-level Automation and Tooling"
+        developerExperience:
+          type: array
+          items: { type: string }
+          example:
+            - "Streamlining Onboarding with 'Getting Started' Guides"
+            - "Pre-commit Hooks and Linters for Quality Control"
+            - "Building and Maintaining CI/CD Pipelines"
+        backendAutomation:
+          type: object
+          properties:
+            languages:
+              type: array
+              items: { type: string }
+              example: ["Python", "JavaScript/TypeScript", "Node.js"]
+            tooling:
+              type: array
+              items: { type: string }
+              example: ["Docker", "Git"]
+            clouds:
+              type: array
+              items: { type: string }
+              example: ["AWS", "Google Cloud", "Azure"]
+    Project:
+      type: object
+      properties:
+        name: { type: string }
+        description: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        repoUrl: { type: string }
+        highlights:
+          type: array
+          items: { type: string }
+    Automation:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        description: { type: string }
+        parameters:
+          type: array
+          items:
+            type: object
+            properties:
+              key: { type: string }
+              type: { type: string, example: "string|boolean|number" }
+              required: { type: boolean }
+              default: { type: string }
+    AutomationRunRequest:
+      type: object
+      properties:
+        automationId: { type: string }
+        params:
+          type: object
+          additionalProperties: true
+    AutomationRunResponse:
+      type: object
+      properties:
+        runId: { type: string }
+        status: { type: string, example: "accepted" }
+        message: { type: string }
+    VSCodeSetupRequest:
+      type: object
+      properties:
+        language: { type: string, example: "typescript" }
+        framework: { type: string, example: "node" }
+        features:
+          type: array
+          items: { type: string }
+          example: ["testing", "linting", "debugging", "devcontainers"]
+        cloud: { type: string, example: "aws" }
+        ci: { type: string, example: "github-actions" }
+    VSCodeSetupResponse:
+      type: object
+      properties:
+        devcontainerJson: { type: string }
+        extensionsJson: { type: string }
+        settingsJson: { type: string }
+        recommendations:
+          type: array
+          items: { type: string }
